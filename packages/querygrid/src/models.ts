@@ -38,6 +38,7 @@ interface IStateModelProps {
     baseFilters?: List<Filter.IFilter>
     bindURL?: boolean
     editable?: boolean
+    includeUpdateColumn?: boolean
     isPaged?: boolean
     loader?: IGridLoader
     maxRows?: number
@@ -81,6 +82,8 @@ export function getStateQueryGridModel(
     initProps?: IStateModelProps | Function, // () => IStateModelProps
     keyValue?: any
 ): QueryGridModel {
+    // FIXME: this method is confusingly named, we have another called getQueryGridModel and we use both all over
+    //  our consuming applications. This method should probably be called getOrLoadQueryGridModel.
     const modelId = getStateModelId(gridId, schemaQuery, keyValue);
 
     // if the model already exists in the global state, return it
@@ -97,6 +100,7 @@ export function getStateQueryGridModel(
         bindURL: true,
         editable: false,
         id: modelId,
+        includeUpdateColumn: false,
         isPaged: false, // Figure out how to set this to the same default value as the model
         loader: DefaultGridLoader,
         keyValue: undefined,
@@ -126,11 +130,17 @@ export function getStateQueryGridModel(
 
     let props: IStateModelProps;
     if (initProps !== undefined) {
+        // FIXME: Is there any reason we don't just do somthing like modelProps = {...modelProps, ...props}? It is
+        //  particularly annoying to have to remember to update this method if you want to add a new prop to QGM.
         props = typeof initProps === 'function' ? initProps() : initProps;
 
         if (props) {
             if (props.bindURL !== undefined) {
                 modelProps.bindURL = props.bindURL === true;
+            }
+
+            if (props.includeUpdateColumn !== undefined) {
+                modelProps.includeUpdateColumn = props.includeUpdateColumn === true;
             }
 
             if (props.isPaged !== undefined) {
