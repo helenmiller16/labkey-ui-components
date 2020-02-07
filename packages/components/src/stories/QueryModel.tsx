@@ -45,9 +45,27 @@ const ExampleComponentTwo = withQueryModel(ExampleComponentImpl);
 
 storiesOf('QueryModel Examples', module)
     .add('Type Safe withQueryModel', () => {
+        // Does not compile.
+        // return <ExampleComponent />;
+
+        // Does not compile.
+        // return <ExampleComponent message="Hello World" />;
+
+        // Does not compile.
+        // return <ExampleComponent queryConfig={config} />;
+
         return <ExampleComponent queryConfig={config} message="Hello World" />;
     })
     .add('Not Type Safe withQueryModel', () => {
+        // Compiles, it should not.
+        // return <ExampleComponentTwo queryConfig={config} />;
+
+        // Compiles, it should not.
+        // return <ExampleComponentTwo queryConfig={config} foo="foo" />;
+
+        // Does not compile.
+        // return <ExampleComponent message="Hello World" />;
+
         // Unfortunately this compiles, it should not.
         return <ExampleComponentTwo queryConfig={config} />;
     });
