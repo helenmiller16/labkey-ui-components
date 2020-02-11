@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react';
-import { InjectedQueryModelProps, withQueryModel, WithQueryModelProps } from '../models/QueryModel';
+import { InjectedQueryModelProps, withQueryModel } from '../models/QueryModel';
 import { storiesOf } from '@storybook/react';
 
 interface ExampleProps extends InjectedQueryModelProps {
@@ -22,6 +22,12 @@ class ExampleComponentImpl extends PureComponent<ExampleProps, ExampleState> {
 
     render() {
         const { queryModel } = this.props;
+        // Commented out code below will not compile because of ImmutableQueryModel:
+        // ERROR in /.../src/stories/QueryModel.tsx(25,20)
+        // TS2540: Cannot assign to 'data' because it is a read-only property.
+        // queryModel.data = { badIdea: 'I will not compile!'};
+        // TS2542: Index signature in type 'Immutable<any>' only permits reading.
+        // queryModel.data.foo.bar = 'I will not compile!';
         return <div>{this.props.message} - {queryModel.schemaName} - {queryModel.queryName} - {queryModel.viewName}</div>;
     }
 }

@@ -13,6 +13,8 @@ export interface QueryModel extends QueryConfig {
     data: { [key: string]: any };
 }
 
+type ImmutableQueryModel = Immutable<QueryModel>;
+
 export interface QueryModelActions {
     // Not the final design, for illustration purposes only.
     load: () => void;
@@ -21,10 +23,12 @@ export interface QueryModelActions {
     addFilter: (filter: any) => void;
 }
 
+type ImmutableQueryModelActions = Immutable<QueryModelActions>;
+
 export interface InjectedQueryModelProps {
     // Probably the final design
-    queryModel: QueryModel;
-    actions: QueryModelActions;
+    queryModel: ImmutableQueryModel;
+    actions: ImmutableQueryModelActions;
 }
 
 export interface MakeQueryModelProps {
