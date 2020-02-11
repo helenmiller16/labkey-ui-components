@@ -103,6 +103,8 @@ export function withQueryModel<P extends InjectedQueryModelProps>(ComponentToWra
             // then the compiler will not bail on the cast to Props below. By casting to unknown first we're telling
             // TypeScript to forget what it thinks it knows. We should not normally do this, but there is no other way
             // to get this to compile, despite it being correct.
+            // There is an issue open on the TypeScript GitHub that is most likely the reason why we need to cast to
+            // unknown: https://github.com/Microsoft/TypeScript/issues/28938
             const unknownProps = props as unknown;
             return <ComponentToWrap {...unknownProps as P} queryModel={queryModel} actions={this.actions} />;
         }
