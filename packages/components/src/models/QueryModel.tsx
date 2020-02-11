@@ -1,4 +1,5 @@
 import React, { PureComponent, ComponentType } from 'react';
+import { Immutable } from './Immutable';
 
 export interface QueryConfig {
     // Not the final design, for illustration purposes only.
@@ -57,7 +58,7 @@ export function withQueryModel<P extends InjectedQueryModelProps>(ComponentToWra
     // QueryConfig, which is converted into a QueryModel and Actions object by withQueryModel. So in effect:
     // MyComponent<Props extends InjectedQueryModelProps> becomes MyComponent<Props extends MakeQueryModelProps>
     // type WithQueryModelProps = Omit<Props, keyof InjectedQueryModelProps> & MakeQueryModelProps;
-    class ComponentWithQueryModel extends React.PureComponent<WithQueryModelProps<P>, QueryModelState> {
+    class ComponentWithQueryModel extends PureComponent<WithQueryModelProps<P>, QueryModelState> {
         actions: QueryModelActions;
 
         constructor(props) {

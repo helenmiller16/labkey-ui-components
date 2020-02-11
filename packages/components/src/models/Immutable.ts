@@ -17,6 +17,6 @@
  *
  * This way you do not need to constantly redefine Immutable<Point> throughout the codebase.
  */
-type Immutable<T> = {
+export type Immutable<T> = {
     readonly [K in keyof T]: Immutable<T[K]>;
 };
