@@ -147,7 +147,8 @@ export class ExpandableDndRow extends PureComponent<ExpandableDndRowProps, Expan
                         ref={provided.innerRef}
                         tabIndex={index}
                         onMouseEnter={showingModal ? undefined : this.onMouseOver}
-                        onMouseLeave={showingModal ? undefined : this.onMouseOut}>
+                        onMouseLeave={showingModal ? undefined : this.onMouseOut}
+                    >
                         <Row key={this.createId('rowcontainer')} className="expandablednd-row-container">
                             <div className="expandablednd-row-handle" {...provided.dragHandleProps}>
                                 <FontAwesomeIcon

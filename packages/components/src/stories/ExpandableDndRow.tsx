@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import { storiesOf } from '@storybook/react';
 import { withKnobs } from '@storybook/addon-knobs';
 
@@ -6,7 +6,7 @@ import './stories.scss';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 import { ExpandableDndRow } from '..';
-import {getIndexFromId} from "../components/domainproperties/actions";
+import './hover.scss';
 
 interface RowState {
     expanded?: number;
@@ -76,8 +76,27 @@ class WrappedExpandableDndRow extends React.Component<any, RowState> {
     }
 }
 
+const HoverExample = () => (
+    <div className="wrapper">
+        <div className="parent">
+            <div className="handle">
+                <div className="fa fa-plus-square" />
+            </div>
+            <div className="body">
+                I am the body
+            </div>
+            <div className="expander">
+                <span className="fa fa-plus-square" />
+            </div>
+        </div>
+    </div>
+);
+
 storiesOf('ExpandableDndRow', module)
     .addDecorator(withKnobs)
     .add('expandable row', () => {
         return <WrappedExpandableDndRow />;
+    })
+    .add('example hover', () => {
+        return <HoverExample />;
     });

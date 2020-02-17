@@ -1,0 +1,21 @@
+.parent {
+    display: flex;
+}
+.handle {
+    width: 50px;
+}
+.expander {
+    width: 50px;
+}
+.body {
+    flex: 1;
+}
+.handle,
+.expander,
+.body {
+    padding: 0.2em;
+}
+.parent:hover .handle,
+.parent:hover .expander {
+    color: red;
+}
