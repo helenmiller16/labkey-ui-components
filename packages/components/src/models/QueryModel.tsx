@@ -1,5 +1,5 @@
 import React, { PureComponent, ComponentType } from 'react';
-import { Immutable } from './Immutable';
+import { DeepReadonly } from './DeepReadonly';
 
 export interface QueryConfig {
     // Not the final design, for illustration purposes only.
@@ -14,7 +14,22 @@ export interface QueryModel extends QueryConfig {
     data: { [key: string]: any };
 }
 
-type ImmutableQueryModel = Immutable<QueryModel>;
+export interface QueryModelLoader {
+    // Not final design, for illustration purposes only.
+    fetch: (model: QueryModel) => Promise<any>;
+    fetchSelections: (model: QueryModel) => Promise<any>;
+}
+
+export const DefaultQueryModelLoader: QueryModelLoader = {
+    // Not final design, for illustration purposes only.
+    fetch(model: QueryModel) {
+        return new Promise((resolve, reject) => {});
+    },
+
+    fetchSelections(model: QueryModel) {
+        return new Promise((resolve, reject) => {});
+    },
+};
 
 export interface QueryModelActions {
     // Not the final design, for illustration purposes only.
@@ -24,17 +39,16 @@ export interface QueryModelActions {
     addFilter: (filter: any) => void;
 }
 
-type ImmutableQueryModelActions = Immutable<QueryModelActions>;
-
 export interface InjectedQueryModelProps {
     // Probably the final design
-    queryModel: ImmutableQueryModel;
-    actions: ImmutableQueryModelActions;
+    queryModel: DeepReadonly<QueryModel>;
+    actions: DeepReadonly<QueryModelActions>;
 }
 
 export interface MakeQueryModelProps {
     // Probably the final design
     queryConfig: QueryConfig;
+    modelLoader?: QueryModelLoader;
 }
 
 // See the comments in withQueryModel below.
@@ -57,19 +71,19 @@ export function withQueryModel<P extends InjectedQueryModelProps>(ComponentToWra
     // object. The wrapped component won't expect a QueryModel or Actions object as props, instead it will only expect a
     // QueryConfig, which is converted into a QueryModel and Actions object by withQueryModel. So in effect:
     // MyComponent<Props extends InjectedQueryModelProps> becomes MyComponent<Props extends MakeQueryModelProps>
-    // type WithQueryModelProps = Omit<Props, keyof InjectedQueryModelProps> & MakeQueryModelProps;
+
     class ComponentWithQueryModel extends PureComponent<WithQueryModelProps<P>, QueryModelState> {
         actions: QueryModelActions;
+        static defaultProps = {};
 
-        constructor(props) {
+        constructor(props: WithQueryModelProps<P>) {
             super(props);
+            const { queryConfig } = props;
+
             this.state = {
                 queryModel: {
-                    id: 'someId',
-                    schemaName: 'foo',
-                    queryName: 'bar',
-                    viewName: '~~default~~',
-                    data: {},
+                    ...queryConfig,
+                    data: null,
                 },
             };
 
@@ -114,6 +128,11 @@ export function withQueryModel<P extends InjectedQueryModelProps>(ComponentToWra
             return <ComponentToWrap {...unknownProps as P} queryModel={queryModel} actions={this.actions} />;
         }
     }
+
+    // https://stackoverflow.com/questions/59279796/typescript-partial-of-a-generic-type
+    ComponentWithQueryModel.defaultProps = {
+        modelLoader: DefaultQueryModelLoader,
+    };
 
     return ComponentWithQueryModel;
 }
