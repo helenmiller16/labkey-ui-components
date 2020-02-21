@@ -1,4 +1,4 @@
-// DeepReadOnly<T> is described here: https://stackoverflow.com/a/49670389
+// DeepReadOnly<T> is from here: https://github.com/krzkaczor/ts-essentials/blob/master/lib/types.ts
 // In the future, TypeScript may add DeepReadOnly<T>: https://github.com/microsoft/TypeScript/issues/13923
 // If DeepReadOnly is added in a future release of TypeScript we should remove ours, just like we did with Omit<T>.
 // See also: https://www.sitepoint.com/compile-time-immutability-in-typescript/
@@ -17,14 +17,24 @@
  *
  * This way you do not need to constantly redefine DeepReadOnly<Point> throughout the codebase.
  */
-export type DeepReadonly<T> =
-    T extends (infer R)[] ? DeepReadonlyArray<R> :
-    T extends Function ? T :
-    T extends object ? DeepReadonlyObject<T> :
-    T;
-
-interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
-
-type DeepReadonlyObject<T> = {
-    readonly [P in keyof T]: DeepReadonly<T[P]>;
-};
+export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
+export type Builtin = Primitive | Function | Date | Error | RegExp;
+export type DeepReadonly<T> = T extends Builtin
+    ? T
+    : T extends Map<infer K, infer V>
+    ? ReadonlyMap<DeepReadonly<K>, DeepReadonly<V>>
+    : T extends ReadonlyMap<infer K, infer V>
+    ? ReadonlyMap<DeepReadonly<K>, DeepReadonly<V>>
+    : T extends WeakMap<infer K, infer V>
+    ? WeakMap<DeepReadonly<K>, DeepReadonly<V>>
+    : T extends Set<infer U>
+    ? ReadonlySet<DeepReadonly<U>>
+    : T extends ReadonlySet<infer U>
+    ? ReadonlySet<DeepReadonly<U>>
+    : T extends WeakSet<infer U>
+    ? WeakSet<DeepReadonly<U>>
+    : T extends Promise<infer U>
+    ? Promise<DeepReadonly<U>>
+    : T extends {}
+    ? { readonly [K in keyof T]: DeepReadonly<T[K]> }
+    : Readonly<T>;
