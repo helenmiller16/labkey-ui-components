@@ -34,10 +34,12 @@ interface QueryModelState {
     queryModel?: QueryModel;
 }
 
-export function withQueryModel<Props>(ComponentToWrap: ComponentType<Props & InjectedQueryModelProps>): ComponentType<Props & MakeQueryModelProps> {
-    // The components we're wrapping should extend InjectedQueryModelProps so they can receive a QueryModel and Actions
-    // object. The wrapped component won't expect a QueryModel or Actions object as props, instead it will only expect a
-    // QueryConfig, which is converted into a QueryModel and Actions object by withQueryModel. So in effect:
+export function withQueryModel<Props>(ComponentToWrap: ComponentType<Props & InjectedQueryModelProps>)
+    : ComponentType<Props & MakeQueryModelProps> {
+    // The components we're wrapping should untion their props with InjectedQueryModelProps so they can receive a
+    // QueryModel and Actions object. The wrapped component won't expect a QueryModel or Actions object as props,
+    // instead it will only expect a QueryConfig, which is converted into a QueryModel and Actions object by
+    // withQueryModel. So in effect:
     // MyComponent<Props & InjectedQueryModelProps> becomes MyComponent<Props & MakeQueryModelProps>
 
     class ComponentWithQueryModel extends PureComponent<Props & MakeQueryModelProps, QueryModelState> {
