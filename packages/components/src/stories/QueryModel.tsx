@@ -15,12 +15,6 @@ class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryMod
         // TS2540: Cannot assign to 'data' because it is a read-only property.
         // queryModel.data = { badIdea: 'I will not compile!'};
         const { loadingRows, loadingSelections } = queryModel;
-        const isLoading = loadingRows || loadingSelections;
-
-        if (isLoading && queryModel.rows === null) {
-            return <LoadingSpinner />;
-        }
-
         const { schemaName, queryName, viewName, offset, maxRows, rowCount } = queryModel;
 
         return (
@@ -50,7 +44,7 @@ class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryMod
                         const rowId = row.RowId.value;
                         const name = row.Name.displayValue || row.Name.value;
                         const expirationTime = row.expirationTime.value;
-                        // The key below is wonky because our test id has a bunch of duplicate rowIds
+                        // The key below is wonky because our test data has a bunch of duplicate rowIds
                         return (
                             <li key={`${rowId}-${idx}`}>
                                 {name} - {expirationTime}

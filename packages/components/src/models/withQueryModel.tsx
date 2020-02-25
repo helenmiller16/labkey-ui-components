@@ -86,12 +86,7 @@ export function withQueryModel<Props>(ComponentToWrap: ComponentType<Props & Inj
         }
 
         loadRows = () => {
-            const { queryModel } = this.state;
-
-            console.log('loading rows', queryModel.offset, queryModel.maxRows);
-
-            this.props.modelLoader.fetch(this.state.queryModel).then(({response, request}) => {
-                console.log('response:', response);
+            this.props.modelLoader.fetch(this.state.queryModel).then(({response}) => {
                 this.setState((state) => {
                     const { rowCount, rows } = response;
                     return {
