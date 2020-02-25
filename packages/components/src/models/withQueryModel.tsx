@@ -6,6 +6,8 @@ export interface QueryModelActions {
     // Not the final design, for illustration purposes only.
     load: () => void;
     loadPage: (pageNumber: number) => void;
+    nextPage: () => void;
+    prevPage: () => void;
     sort: (column: any, direction: string) => void;
     addFilter: (filter: any) => void;
 }
@@ -57,7 +59,13 @@ export function withQueryModel<Props>(ComponentToWrap: ComponentType<Props & Inj
             this.state = {
                 queryModel: {
                     ...props.queryConfig,
-                    data: null,
+                    maxRows: props.queryConfig.maxRows ? props.queryConfig.maxRows : 20,
+                    offset: props.queryConfig.offset ? props.queryConfig.offset : 0,
+                    rowCount: null,
+                    loadingRows: true,
+                    loadingSelections: true,
+                    selections: null,
+                    rows: null,
                 },
             };
 
@@ -66,17 +74,103 @@ export function withQueryModel<Props>(ComponentToWrap: ComponentType<Props & Inj
             this.actions = {
                 load: this.load,
                 loadPage: this.loadPage,
+                nextPage: this.nextPage,
+                prevPage: this.prevPage,
                 sort: this.sort,
                 addFilter: this.addFilter,
             };
         }
 
+        componentDidMount() {
+            this.load();
+        }
+
+        loadRows = () => {
+            const { queryModel } = this.state;
+
+            console.log('loading rows', queryModel.offset, queryModel.maxRows);
+
+            this.props.modelLoader.fetch(this.state.queryModel).then(({response, request}) => {
+                console.log('response:', response);
+                this.setState((state) => {
+                    const { rowCount, rows } = response;
+                    return {
+                        queryModel: {
+                            ...state.queryModel,
+                            rowCount,
+                            rows,
+                            loadingRows: false,
+                        }
+                    };
+                });
+            }).catch(({response, request}) => {
+                console.error('Error fetching data');
+                console.error('response:', response);
+                console.error('request', request);
+            });
+        };
+
+        loadSelections = () => {
+            this.props.modelLoader.fetchSelections(this.state.queryModel).then(({ selections }) => {
+                this.setState((state) => {
+                    return {
+                        queryModel: {
+                            ...state.queryModel,
+                            selections,
+                            loadingSelections: false,
+                        }
+                    };
+                });
+            }).catch(() => {
+                console.error('Error fetching selections');
+            });
+        };
+
         load = () => {
-            console.log('load model');
+            this.loadRows();
+            this.loadSelections();
+        };
+
+        nextPage = () => {
+            this.setState((state) => {
+                return {
+                    queryModel: {
+                        ...state.queryModel,
+                        offset: state.queryModel.offset + state.queryModel.maxRows,
+                        loadingRows: true,
+                    }
+                };
+            }, this.loadRows);
+        };
+
+        prevPage = () => {
+            this.setState((state) => {
+                let offset = (state.queryModel.offset - this.state.queryModel.maxRows) || 0;
+
+                return {
+                    queryModel: {
+                        ...state.queryModel,
+                        offset,
+                        loadingRows: true,
+                    }
+                };
+            }, this.loadRows);
         };
 
         loadPage = (pageNumber: number) => {
-            console.log('loadPage', pageNumber)
+            if (pageNumber < 1) {
+                pageNumber = 1;
+            }
+
+            this.setState((state) => {
+                return {
+                    queryModel: {
+                        ...state.queryModel,
+                        offset: pageNumber * state.queryModel.maxRows,
+                        loadingRows: true,
+                    }
+                }
+            }, this.loadRows);
         };
 
         sort = (column: any, direction: string) => {

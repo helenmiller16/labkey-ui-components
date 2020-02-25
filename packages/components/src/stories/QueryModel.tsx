@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { InjectedQueryModelProps, withQueryModel } from '../models/withQueryModel';
 import { storiesOf } from '@storybook/react';
+import { LoadingSpinner } from '..';
 
 interface ExampleProps {
     message: string,
@@ -8,20 +9,65 @@ interface ExampleProps {
 
 class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryModelProps, {}> {
     render() {
-        const { queryModel } = this.props;
+        const { message, queryModel, actions } = this.props;
         // Commented out code below will not compile because of ImmutableQueryModel:
         // ERROR in /.../src/stories/QueryModel.tsx(25,20)
         // TS2540: Cannot assign to 'data' because it is a read-only property.
         // queryModel.data = { badIdea: 'I will not compile!'};
-        return <div>{this.props.message} - {queryModel.schemaName} - {queryModel.queryName} - {queryModel.viewName}</div>;
+        const { loadingRows, loadingSelections } = queryModel;
+        const isLoading = loadingRows || loadingSelections;
+
+        if (isLoading && queryModel.rows === null) {
+            return <LoadingSpinner />;
+        }
+
+        const { schemaName, queryName, viewName, offset, maxRows, rowCount } = queryModel;
+
+        return (
+            <div>
+                <div className="example-component-message">
+                    {message}
+                </div>
+
+                <div className="query-model-info">
+                    <div>Schema Name: {schemaName}</div>
+                    <div>Query Name: {queryName}</div>
+                    <div>View Name: {viewName}</div>
+                    <div>Offset: {queryModel.offset}</div>
+                    <div>
+                        <button disabled={offset === 0} onClick={actions.prevPage}>Previous</button>
+                        <span>&nbsp;</span>
+                        <button disabled={(offset + maxRows) >= rowCount} onClick={actions.nextPage}>Next</button>
+                    </div>
+                </div>
+
+                <div>
+                    {loadingRows ? <LoadingSpinner msg="loading page" /> : <span>&nbsp;</span>}
+                </div>
+
+                <ul className="query-model-rows">
+                    {queryModel.rows?.map((row, idx) => {
+                        const rowId = row.RowId.value;
+                        const name = row.Name.displayValue || row.Name.value;
+                        const expirationTime = row.expirationTime.value;
+                        // The key below is wonky because our test id has a bunch of duplicate rowIds
+                        return (
+                            <li key={`${rowId}-${idx}`}>
+                                {name} - {expirationTime}
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        );
     }
 }
 
 const config = {
     id: 'myId',
-    schemaName: 'mySchema',
-    queryName: 'myQuery',
-    viewName: '~~DETAILS~~',
+    schemaName: 'exp.data',
+    queryName: 'mixturespaging',
+    viewName: '~~DEFAULT~~',
 };
 
 // Type safe, compiler will error when missing the props expected by MakeQueryModelProps or any other props from the
