@@ -358,7 +358,7 @@ export function initQueryGridMocks() {
             .body(JSON.stringify(responseBody));
     });
 
-    mock.post(/.*\/query\/?.*\/getQuery.*/,  (req, res) => {
+    mock.post(/.*\/query\/?.*\/getQuery.*/,  delay((req, res) => {
         const params = decodeURIComponent(req.body()).split('&').reduce((result, param) => {
             const [name, value] = param.split('=');
             result[name] = value;
@@ -388,7 +388,7 @@ export function initQueryGridMocks() {
             .status(200)
             .headers({'Content-Type': 'application/json'})
             .body(JSON.stringify(responseBody));
-    });
+    }, 500));
 
     mock.post(/.*\/query\/?.*\/getSelected.*/, (req, res) => {
         const queryParams = req.url().query;
