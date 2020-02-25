@@ -1,11 +1,40 @@
 import React, { PureComponent } from 'react';
-import { InjectedQueryModelProps, withQueryModel } from '../models/withQueryModel';
 import { storiesOf } from '@storybook/react';
 import { LoadingSpinner } from '..';
+import { InjectedQueryModelProps, withQueryModel } from '../models/withQueryModel';
+import { QueryModel } from '../models/QueryModel';
+import { DeepReadonly } from '../models/DeepReadonly';
 
 interface ExampleProps {
     message: string,
 }
+
+interface QueryModelInfoProps {
+    queryModel: DeepReadonly<QueryModel>;
+    nextPage: () => void;
+    prevPage: () => void;
+}
+
+const QueryModelInfo = (props: QueryModelInfoProps) => {
+    const { queryModel, nextPage, prevPage } = props;
+    const { schemaName, queryName, viewName, offset, maxRows, rowCount, loadingRows } = queryModel;
+    const prevDisabled = loadingRows || offset === 0;
+    const nextDisabled = loadingRows || ((offset + maxRows) >= rowCount);
+
+    return (
+        <div className="query-model-info">
+            <div>Schema Name: {schemaName}</div>
+            <div>Query Name: {queryName}</div>
+            <div>View Name: {viewName}</div>
+            <div>Offset: {queryModel.offset}</div>
+            <div>
+                <button disabled={prevDisabled} onClick={prevPage}>Previous</button>
+                <span>&nbsp;</span>
+                <button disabled={nextDisabled} onClick={nextPage}>Next</button>
+            </div>
+        </div>
+    )
+};
 
 class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryModelProps, {}> {
     render() {
@@ -14,8 +43,7 @@ class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryMod
         // ERROR in /.../src/stories/QueryModel.tsx(25,20)
         // TS2540: Cannot assign to 'data' because it is a read-only property.
         // queryModel.data = { badIdea: 'I will not compile!'};
-        const { loadingRows, loadingSelections } = queryModel;
-        const { schemaName, queryName, viewName, offset, maxRows, rowCount } = queryModel;
+        const { loadingRows } = queryModel;
 
         return (
             <div>
@@ -23,17 +51,7 @@ class ExampleComponentImpl extends PureComponent<ExampleProps & InjectedQueryMod
                     {message}
                 </div>
 
-                <div className="query-model-info">
-                    <div>Schema Name: {schemaName}</div>
-                    <div>Query Name: {queryName}</div>
-                    <div>View Name: {viewName}</div>
-                    <div>Offset: {queryModel.offset}</div>
-                    <div>
-                        <button disabled={offset === 0} onClick={actions.prevPage}>Previous</button>
-                        <span>&nbsp;</span>
-                        <button disabled={(offset + maxRows) >= rowCount} onClick={actions.nextPage}>Next</button>
-                    </div>
-                </div>
+                <QueryModelInfo queryModel={queryModel} nextPage={actions.nextPage} prevPage={actions.prevPage} />
 
                 <div>
                     {loadingRows ? <LoadingSpinner msg="loading page" /> : <span>&nbsp;</span>}
