@@ -1,6 +1,11 @@
 # @labkey/components
 Components, models, actions, and utility functions for LabKey applications and pages.
 
+### version 0.??.??
+*Released*: ?? August 2020
+* SelectionMenuItem: add support for QueryModel and QueryGridModel
+ * We need to support this while we transition away from QueryGridModel to QueryModel
+
 ### version 0.82.1
 *Released*: 29 July 2020
 * Fix sorts issue with QueryModel.urlQueryParams
