@@ -99,9 +99,7 @@ export class LookupCell extends ReactN.Component<LookupCellProps, LookupCellStat
 
     focusInput = (): void => {
         this.cancelBlur();
-        if (this.inputEl && this.inputEl.current) {
-            this.inputEl.current.focus();
-        }
+        this.inputEl?.current?.focus();
     };
 
     hasInputValue(): boolean {
@@ -204,7 +202,7 @@ export class LookupCell extends ReactN.Component<LookupCellProps, LookupCellStat
             vd,
             col.isJunctionLookup() ? MODIFICATION_TYPES.ADD : MODIFICATION_TYPES.REPLACE
         );
-        if (onCellModify) onCellModify();
+        onCellModify?.();
         this.clearInput();
 
         if (!this.isMultiValue()) {
@@ -218,8 +216,7 @@ export class LookupCell extends ReactN.Component<LookupCellProps, LookupCellStat
     onItemRemove = (vd: ValueDescriptor): void => {
         const { modelId, colIdx, rowIdx, onCellModify } = this.props;
         modifyCell(modelId, colIdx, rowIdx, vd, MODIFICATION_TYPES.REMOVE);
-        if (onCellModify) onCellModify();
-
+        onCellModify?.();
         this.focusInput();
     };
 

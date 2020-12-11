@@ -153,14 +153,11 @@ storiesOf('EditableGridPanel', module)
         const model = getStateQueryGridModel(modelId, schemaQuery, {
             editable: true,
             loader: {
-                fetch: () => {
-                    return new Promise(resolve => {
-                        resolve({
-                            data: constants.GRID_DATA,
-                            dataIds: constants.GRID_DATA.keySeq().toList(),
-                        });
-                    });
-                },
+                fetch: () =>
+                    Promise.resolve({
+                        data: constants.GRID_DATA,
+                        dataIds: constants.GRID_DATA.keySeq().toList(),
+                    }),
             },
         });
 
@@ -209,14 +206,11 @@ storiesOf('EditableGridPanel', module)
         const model = getStateQueryGridModel(modelId, schemaQuery, {
             editable: true,
             loader: {
-                fetch: () => {
-                    return new Promise(resolve => {
-                        resolve({
-                            data: constants.GRID_DATA,
-                            dataIds: constants.GRID_DATA.keySeq().toList(),
-                        });
-                    });
-                },
+                fetch: () =>
+                    Promise.resolve({
+                        data: constants.GRID_DATA,
+                        dataIds: constants.GRID_DATA.keySeq().toList(),
+                    }),
             },
         });
 
@@ -247,14 +241,11 @@ storiesOf('EditableGridPanel', module)
         const model = getStateQueryGridModel(modelId, schemaQuery, {
             editable: true,
             loader: {
-                fetch: () => {
-                    return new Promise(resolve => {
-                        resolve({
-                            data: constants.GRID_DATA,
-                            dataIds: constants.GRID_DATA.keySeq().toList(),
-                        });
-                    });
-                },
+                fetch: () =>
+                    Promise.resolve({
+                        data: constants.GRID_DATA,
+                        dataIds: constants.GRID_DATA.keySeq().toList(),
+                    }),
             },
         });
         gridInit(model, true);
@@ -294,14 +285,11 @@ storiesOf('EditableGridPanel', module)
         const model = getStateQueryGridModel(modelId, schemaQuery, {
             editable: true,
             loader: {
-                fetch: () => {
-                    return new Promise(resolve => {
-                        resolve({
-                            data: constants.GRID_DATA,
-                            dataIds: constants.GRID_DATA.keySeq().toList(),
-                        });
-                    });
-                },
+                fetch: () =>
+                    Promise.resolve({
+                        data: constants.GRID_DATA,
+                        dataIds: constants.GRID_DATA.keySeq().toList(),
+                    }),
             },
         });
         gridInit(model, true);

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import classNames from 'classnames';
 import { OrderedMap, Map } from 'immutable';
 import { Dropdown, MenuItem } from 'react-bootstrap';
@@ -31,7 +31,7 @@ export function headerCell(
     selectable?: boolean,
     sortable = true,
     columnCount?: number
-) {
+): ReactNode {
     const col: QueryColumn = column.raw;
 
     if (!col) {
@@ -100,7 +100,7 @@ export function headerSelectionCell(
     selectedState: GRID_CHECKBOX_OPTIONS,
     disabled: boolean,
     className?
-) {
+): ReactNode {
     const isChecked = selectedState === GRID_CHECKBOX_OPTIONS.ALL;
     const isIndeterminate = selectedState === GRID_CHECKBOX_OPTIONS.SOME;
 

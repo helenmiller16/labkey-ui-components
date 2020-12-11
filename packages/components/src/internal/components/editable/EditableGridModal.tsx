@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { PureComponent } from 'react';
 import { Modal } from 'react-bootstrap';
 
 import { gridInit, schemaGridInvalidate } from '../../actions';
@@ -23,7 +23,7 @@ interface Props extends EditableGridProps {
     isSaving?: boolean;
 }
 
-export class EditableGridModal extends React.PureComponent<Props, any> {
+export class EditableGridModal extends PureComponent<Props> {
     static defaultProps = {
         cancelText: 'Cancel',
         saveText: 'Save',
@@ -39,25 +39,23 @@ export class EditableGridModal extends React.PureComponent<Props, any> {
         if (nextProps.show && !nextProps.isSaving) this.init();
     }
 
-    componentWillUnmount() {
+    componentWillUnmount = (): void => {
         schemaGridInvalidate(this.props.model.schema);
-    }
-
-    init() {
-        gridInit(this.getQueryGridModel(), true, this);
-    }
-
-    onCancel = () => {
-        if (this.props.onCancel) {
-            this.props.onCancel();
-        }
     };
 
-    getQueryGridModel() {
-        return getQueryGridModel(this.props.model.getId()) || this.props.model;
-    }
+    init = (): void => {
+        gridInit(this.getQueryGridModel(), true, this);
+    };
 
-    onSave = () => {
+    onCancel = (): void => {
+        this.props.onCancel?.();
+    };
+
+    getQueryGridModel = (): QueryGridModel => {
+        return getQueryGridModel(this.props.model.getId()) || this.props.model;
+    };
+
+    onSave = (): void => {
         this.props.onSave(this.getQueryGridModel());
     };
 

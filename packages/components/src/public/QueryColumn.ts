@@ -175,7 +175,7 @@ export class QueryColumn extends Record({
         return this.name && this.name.toLowerCase().indexOf(QueryColumn.DATA_INPUTS.toLowerCase()) !== -1;
     }
 
-    isEditable() {
+    isEditable(): boolean {
         return !this.readOnly && this.userEditable && this.shownInUpdateView;
     }
 

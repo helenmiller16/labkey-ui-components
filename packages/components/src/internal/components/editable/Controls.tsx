@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { Component, FC, MouseEvent, ReactNode, useCallback } from 'react';
 import { Button, MenuItem, SplitButton } from 'react-bootstrap';
 import classNames from 'classnames';
 
 import { MAX_EDITABLE_GRID_ROWS } from '../../constants';
-import { LabelHelpTip } from '../../..';
 
 export type PlacementType = 'top' | 'bottom' | 'both';
 
@@ -33,16 +32,16 @@ export interface AddRowsControlProps {
     addText?: string;
     onAdd: Function;
     quickAddText?: string;
-    onQuickAdd?: Function;
+    onQuickAdd?: (count: number) => void;
     placement?: PlacementType;
     wrapperClass?: string;
 }
 
 interface AddRowsControlState {
-    count?: number;
+    count: number;
 }
 
-export class AddRowsControl extends React.Component<AddRowsControlProps, AddRowsControlState> {
+export class AddRowsControl extends Component<AddRowsControlProps, AddRowsControlState> {
     static defaultProps = {
         addText: 'Add',
         disable: false,
@@ -63,29 +62,23 @@ export class AddRowsControl extends React.Component<AddRowsControlProps, AddRows
             count: this.props.initialCount,
         };
 
-        this.getAddCount = this.getAddCount.bind(this);
-        this.onAdd = this.onAdd.bind(this);
-        this.onBlur = this.onBlur.bind(this);
-        this.onChange = this.onChange.bind(this);
-        this.onQuickAdd = this.onQuickAdd.bind(this);
-
         this.addCount = React.createRef();
     }
 
-    getAddCount(): number {
+    getAddCount = (): number => {
         if (this.addCount.current) {
             return parseInt(this.addCount.current.value);
         }
-    }
+    };
 
-    isValid(count: number): boolean {
+    isValid = (count: number): boolean => {
         return (
             (!this.props.minCount || count > this.props.minCount - 1) &&
             (!this.props.maxCount || count <= this.getMaxRowsToAdd())
         );
-    }
+    };
 
-    onAdd() {
+    onAdd = (): void => {
         if (this.isValid(this.state.count)) {
             const numToAdd = this.state.count;
             this.setState(
@@ -93,42 +86,37 @@ export class AddRowsControl extends React.Component<AddRowsControlProps, AddRows
                 () => this.props.onAdd(numToAdd)
             );
         }
-    }
+    };
 
-    onBlur() {
+    onBlur = (): void => {
         if (!this.isValid(this.state.count)) {
             this.setState({
                 count: this.props.initialCount,
             });
         }
-    }
+    };
 
-    onChange(event) {
+    onChange = (event): void => {
         let count = parseInt(event.target.value);
 
         if (isNaN(count)) {
             count = undefined;
         }
 
-        this.setState({
-            count,
-        });
-    }
+        this.setState({ count });
+    };
 
-    hasError(): boolean {
+    hasError = (): boolean => {
         const { count } = this.state;
 
         return count !== undefined && !this.isValid(count);
-    }
+    };
 
-    onQuickAdd() {
-        const { onQuickAdd } = this.props;
-        if (onQuickAdd) {
-            onQuickAdd(this.state.count);
-        }
-    }
+    onQuickAdd = (): void => {
+        this.props.onQuickAdd?.(this.state.count);
+    };
 
-    renderButton() {
+    renderButton = (): ReactNode => {
         const { disable, quickAddText, onQuickAdd, addText, nounSingular, nounPlural } = this.props;
         const { count } = this.state;
 
@@ -151,16 +139,16 @@ export class AddRowsControl extends React.Component<AddRowsControlProps, AddRows
                 )}
             </span>
         );
-    }
+    };
 
-    shouldRenderHelpText() {
-        return this.props.maxCount || this.props.maxTotalCount;
-    }
+    shouldRenderHelpText = (): boolean => {
+        return this.props.maxCount !== undefined || this.props.maxTotalCount !== undefined;
+    };
 
-    getMaxRowsToAdd() {
+    getMaxRowsToAdd = (): number => {
         const { maxCount, maxTotalCount } = this.props;
         return maxCount && maxTotalCount && maxCount > maxTotalCount ? maxTotalCount : maxCount;
-    }
+    };
 
     render() {
         const { disable, minCount, nounPlural, nounSingular, placement, wrapperClass } = this.props;
@@ -193,7 +181,7 @@ export class AddRowsControl extends React.Component<AddRowsControlProps, AddRows
                 </span>
                 {hasError && (
                     <span className="text-danger pull-left add-control--error-message">
-                        {minCount == maxToAdd
+                        {minCount === maxToAdd
                             ? `${minCount} ${nounSingular.toLowerCase()} allowed`
                             : `${minCount}-${maxToAdd} ${nounPlural.toLowerCase()} allowed`}
                     </span>
@@ -204,28 +192,23 @@ export class AddRowsControl extends React.Component<AddRowsControlProps, AddRows
 }
 
 interface RightClickToggleProps {
-    bsRole?: any;
-    onClick?: any;
+    onClick?: (event: MouseEvent<HTMLDivElement>) => void;
 }
 
-export class RightClickToggle extends React.Component<RightClickToggleProps, any> {
-    constructor(props) {
-        super(props);
-        this.handleClick = this.handleClick.bind(this);
-    }
+export const RightClickToggle: FC<RightClickToggleProps> = ({ children, onClick }) => {
+    const handleClick = useCallback(
+        (e: MouseEvent<HTMLDivElement>) => {
+            if (e.button === 2 || e.buttons === 2) {
+                e.preventDefault();
+                onClick?.(e);
+            }
+        },
+        [onClick]
+    );
 
-    handleClick(e) {
-        if (e.button === 2 || e.buttons === 2) {
-            e.preventDefault();
-            this.props.onClick(e);
-        }
-    }
-
-    render() {
-        return (
-            <div className="cellular-count-content" onClick={this.handleClick} onContextMenu={this.handleClick}>
-                {this.props.children}
-            </div>
-        );
-    }
-}
+    return (
+        <div className="cellular-count-content" onClick={handleClick} onContextMenu={handleClick}>
+            {children}
+        </div>
+    );
+};

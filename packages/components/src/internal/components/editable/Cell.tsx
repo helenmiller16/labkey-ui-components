@@ -27,24 +27,24 @@ import { QueryColumn } from '../../..';
 
 import { getQueryColumnRenderers } from '../../global';
 
-import { LookupCell, LookupCellProps } from './LookupCell';
+import { LookupCell } from './LookupCell';
 
 interface Props {
     col: QueryColumn;
     colIdx: number;
+    filteredLookupKeys?: List<any>;
+    filteredLookupValues?: List<string>;
+    focused?: boolean;
+    message?: CellMessage;
     modelId: string;
     name?: string;
+    onCellModify?: () => any;
     placeholder?: string;
     readOnly?: boolean;
     rowIdx: number;
-    focused?: boolean;
-    message?: CellMessage;
     selected?: boolean;
     selection?: boolean;
     values?: List<ValueDescriptor>;
-    onCellModify?: () => any;
-    filteredLookupValues?: List<string>;
-    filteredLookupKeys?: List<any>;
 }
 
 export class Cell extends React.PureComponent<Props> {
@@ -66,7 +66,7 @@ export class Cell extends React.PureComponent<Props> {
         this.displayEl = React.createRef();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(): void {
         if (!this.props.focused && this.props.selected) {
             this.displayEl.current.focus();
         }
@@ -80,18 +80,7 @@ export class Cell extends React.PureComponent<Props> {
 
     handleBlur = (evt: any): void => {
         clearTimeout(this.changeTO);
-        const { colIdx, modelId, rowIdx, onCellModify } = this.props;
-        modifyCell(
-            modelId,
-            colIdx,
-            rowIdx,
-            {
-                display: evt.target.value,
-                raw: evt.target.value,
-            },
-            MODIFICATION_TYPES.REPLACE
-        );
-        if (onCellModify) onCellModify();
+        this.replaceValue(evt.target.value);
     };
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -99,18 +88,7 @@ export class Cell extends React.PureComponent<Props> {
 
         clearTimeout(this.changeTO);
         this.changeTO = window.setTimeout(() => {
-            const { colIdx, modelId, rowIdx, onCellModify } = this.props;
-            modifyCell(
-                modelId,
-                colIdx,
-                rowIdx,
-                {
-                    display: event.target.value,
-                    raw: event.target.value,
-                },
-                MODIFICATION_TYPES.REPLACE
-            );
-            if (onCellModify) onCellModify();
+            this.replaceValue(event.target.value);
         }, 250);
     };
 
@@ -126,7 +104,7 @@ export class Cell extends React.PureComponent<Props> {
         focusCell(modelId, colIdx, rowIdx);
     };
 
-    handleKeys = (event: React.KeyboardEvent<HTMLElement>) => {
+    handleKeys = (event: React.KeyboardEvent<HTMLElement>): void => {
         const { colIdx, focused, modelId, rowIdx, selected, onCellModify } = this.props;
 
         switch (event.keyCode) {
@@ -154,7 +132,7 @@ export class Cell extends React.PureComponent<Props> {
                 if (!focused && selected && !this.isReadOnly()) {
                     cancelEvent(event);
                     modifyCell(modelId, colIdx, rowIdx, undefined, MODIFICATION_TYPES.REMOVE_ALL);
-                    if (onCellModify) onCellModify();
+                    onCellModify?.();
                 }
                 break;
             case KEYS.Tab:
@@ -193,7 +171,7 @@ export class Cell extends React.PureComponent<Props> {
         }
     };
 
-    handleMouseEnter = (event: any): void => {
+    handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>): void => {
         const { colIdx, modelId, rowIdx } = this.props;
 
         if (inDrag(modelId)) {
@@ -202,7 +180,7 @@ export class Cell extends React.PureComponent<Props> {
         }
     };
 
-    handleSelect = (event): void => {
+    handleSelect = (event: React.MouseEvent<HTMLDivElement>): void => {
         const { colIdx, modelId, rowIdx, selected } = this.props;
 
         if (event.ctrlKey || event.metaKey) {
@@ -213,6 +191,21 @@ export class Cell extends React.PureComponent<Props> {
         } else if (!selected) {
             selectCell(modelId, colIdx, rowIdx);
         }
+    };
+
+    replaceValue = (value: any): void => {
+        const { colIdx, modelId, rowIdx, onCellModify } = this.props;
+        modifyCell(
+            modelId,
+            colIdx,
+            rowIdx,
+            {
+                display: value,
+                raw: value,
+            },
+            MODIFICATION_TYPES.REPLACE
+        );
+        onCellModify?.();
     };
 
     render() {
@@ -256,7 +249,10 @@ export class Cell extends React.PureComponent<Props> {
                 tabIndex: -1,
             };
 
-            if (valueDisplay.length === 0 && placeholder) valueDisplay = placeholder;
+            if (valueDisplay.length === 0 && placeholder) {
+                valueDisplay = placeholder;
+            }
+
             const cell = <div {...displayProps}>{valueDisplay}</div>;
 
             if (message) {
@@ -278,20 +274,20 @@ export class Cell extends React.PureComponent<Props> {
         }
 
         if (col.isPublicLookup()) {
-            const lookupProps: LookupCellProps = {
-                col,
-                colIdx,
-                disabled: this.isReadOnly(),
-                modelId,
-                rowIdx,
-                select: selectCell,
-                values,
-                onCellModify,
-                filteredLookupValues,
-                filteredLookupKeys,
-            };
-
-            return <LookupCell {...lookupProps} />;
+            return (
+                <LookupCell
+                    col={col}
+                    colIdx={colIdx}
+                    disabled={this.isReadOnly()}
+                    filteredLookupKeys={filteredLookupKeys}
+                    filteredLookupValues={filteredLookupValues}
+                    modelId={modelId}
+                    onCellModify={onCellModify}
+                    rowIdx={rowIdx}
+                    select={selectCell}
+                    values={values}
+                />
+            );
         }
 
         // Some cells have custom displays such as multi value comma separated values like alias so
@@ -310,19 +306,19 @@ export class Cell extends React.PureComponent<Props> {
             defaultValue = values.size === 0 ? '' : values.first().display !== undefined ? values.first().display : '';
         }
 
-        const inputProps = {
-            autoFocus: true,
-            defaultValue,
-            disabled: this.isReadOnly(),
-            className: 'cellular-input',
-            onBlur: this.handleBlur,
-            onChange: this.handleChange,
-            onKeyDown: this.handleKeys,
-            placeholder,
-            tabIndex: -1,
-            type: 'text',
-        };
-
-        return <input {...inputProps} />;
+        return (
+            <input
+                autoFocus
+                className="cellular-input"
+                defaultValue={defaultValue}
+                disabled={this.isReadOnly()}
+                onBlur={this.handleBlur}
+                onChange={this.handleChange}
+                onKeyDown={this.handleKeys}
+                placeholder={placeholder}
+                tabIndex={-1}
+                type="text"
+            />
+        );
     }
 }

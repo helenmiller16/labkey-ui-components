@@ -38,7 +38,7 @@ export class EditableGridPanelForUpdate extends React.Component<Props, State> {
         };
     }
 
-    updateDataFromGrid = () => {
+    updateDataFromGrid = (): void => {
         const { model, selectionData, readOnlyColumns, onComplete, updateRows, idField } = this.props;
 
         const editorModel = getEditorModel(model.getId());
@@ -90,7 +90,7 @@ export class EditableGridPanelForUpdate extends React.Component<Props, State> {
                         'Finish Updating ' +
                         model.data.size +
                         ' ' +
-                        (model.data.size == 1 ? capitalizeFirstChar(singularNoun) : capitalizeFirstChar(pluralNoun))
+                        (model.data.size === 1 ? capitalizeFirstChar(singularNoun) : capitalizeFirstChar(pluralNoun))
                     }
                 />
             </>

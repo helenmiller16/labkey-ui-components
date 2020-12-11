@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React from 'react';
+import React, { ReactNode } from 'react';
 import ReactN from 'reactn';
 import { Panel } from 'react-bootstrap';
 
@@ -24,12 +24,16 @@ import { LoadingSpinner, QueryGridModel } from '../../..';
 import { EditableGrid, EditableGridProps } from './EditableGrid';
 
 interface Props extends EditableGridProps {
-    title?: string;
     bsStyle?: any;
     className?: string;
+    title?: ReactNode;
 }
 
-export class EditableGridPanel extends ReactN.Component<Props, any> {
+export class EditableGridPanel extends ReactN.Component<Props> {
+    static defaultProps = {
+        responsive: true,
+    };
+
     constructor(props: EditableGridProps) {
         // @ts-ignore // see https://github.com/CharlesStover/reactn/issues/126
         super(props);
@@ -64,7 +68,7 @@ export class EditableGridPanel extends ReactN.Component<Props, any> {
     }
 
     render() {
-        const { bsStyle, className, title } = this.props;
+        const { bsStyle, className, title, ...gridProps } = this.props;
         const model = this.getModel();
 
         if (!model) {
@@ -72,14 +76,14 @@ export class EditableGridPanel extends ReactN.Component<Props, any> {
         }
 
         if (!title) {
-            return <EditableGrid {...this.props} />;
+            return <EditableGrid {...gridProps} />;
         }
 
         return (
             <Panel bsStyle={bsStyle} className={className}>
                 <Panel.Heading>{title}</Panel.Heading>
-                <Panel.Body className="table-responsive">
-                    <EditableGrid {...this.props} />
+                <Panel.Body>
+                    <EditableGrid {...gridProps} />
                 </Panel.Body>
             </Panel>
         );

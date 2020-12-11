@@ -546,12 +546,12 @@ export class EditorModel
 
     getValidationErrors(queryGridModel: QueryGridModel, uniqueFieldKey?: string): string[] {
         const { uniqueKeyViolations, missingRequired } = this.validateData(queryGridModel, uniqueFieldKey);
-        let errors = [];
+        let errors: string[] = [];
         if (!uniqueKeyViolations.isEmpty()) {
             const messages = uniqueKeyViolations.reduce((keyMessages, valueMap, fieldNames) => {
                 return keyMessages.concat(
-                    valueMap.reduce((messages, rowNumbers, values) => {
-                        messages.push(
+                    valueMap.reduce((msgs, rowNumbers, values) => {
+                        msgs.push(
                             'Duplicate value (' +
                                 values +
                                 ') for ' +
@@ -560,24 +560,24 @@ export class EditorModel
                                 rowNumbers.join(', ') +
                                 '.'
                         );
-                        return messages;
-                    }, new Array<string>())
+                        return msgs;
+                    }, [] as string[])
                 );
-            }, new Array<string>());
+            }, [] as string[]);
             errors = errors.concat(messages);
         }
         if (!missingRequired.isEmpty()) {
             const messages = missingRequired
-                .reduce((messages, rowNumbers, fieldName) => {
-                    messages.push(
+                .reduce((msgs, rowNumbers, fieldName) => {
+                    msgs.push(
                         fieldName +
                             ' is missing from ' +
                             (rowNumbers.size > 1 ? 'rows ' : 'row ') +
                             rowNumbers.join(', ') +
                             '.'
                     );
-                    return messages;
-                }, new Array<string>())
+                    return msgs;
+                }, [] as string[])
                 .join(' ');
             errors = errors.concat(messages);
         }
@@ -614,8 +614,8 @@ export class EditorModel
         return colIdx > -1 && rowIdx > -1 && this.selectionCells.get(genCellKey(colIdx, rowIdx)) !== undefined;
     }
 
-    hasRawValue(descriptor: ValueDescriptor) {
-        return descriptor && descriptor.raw !== undefined && descriptor.raw.toString().trim() !== '';
+    hasRawValue(descriptor: ValueDescriptor): boolean {
+        return descriptor?.raw !== undefined && descriptor.raw.toString().trim() !== '';
     }
 
     hasData(): boolean {
